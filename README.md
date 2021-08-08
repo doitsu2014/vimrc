@@ -103,7 +103,8 @@ I recommend reading the docs of these plugins to understand them better. Each pl
 * [vim-expand-region](https://github.com/terryma/vim-expand-region): Allows you to visually select increasingly larger regions of text using the same key combination
 * [vim-fugitive](https://github.com/tpope/vim-fugitive): A Git wrapper so awesome, it should be illegal
 * [vim-indent-object](https://github.com/michaeljsmith/vim-indent-object): Defines a new text object representing lines of code at the same indent level. Useful for python/vim scripts
-* [vim-multiple-cursors](https://github.com/terryma/vim-multiple-cursors): Sublime Text style multiple selections for Vim, CTRL+N is remapped to CTRL+S (due to YankRing)
+* [vim-visual-multi](https://github.com/terryma/vim-multiple-cursors): Sublime Text style multiple selections for Vim, CTRL+D is remapped to CTRL+S (due to YankRing)
+* ~~[vim-multiple-cursors](https://github.com/terryma/vim-multiple-cursors): Sublime Text style multiple selections for Vim, CTRL+N is remapped to CTRL+S (due to YankRing)~~
 * [vim-yankstack](https://github.com/maxbrunsfeld/vim-yankstack): Maintains a history of previous yanks, changes and deletes
 * [vim-zenroom2](https://github.com/amix/vim-zenroom2) Remove all clutter and focus only on the essential. Similar to iA Writer or Write Room
 * [gist-vim](https://github.com/mattn/gist-vim) Easily create gists from Vim using the `:Gist` command
@@ -114,6 +115,7 @@ I recommend reading the docs of these plugins to understand them better. Each pl
 ## Included color schemes
 
 * [peaksea](https://github.com/vim-scripts/peaksea): The default
+* [dracula](https://github.com/dracula/vim)
 * [vim-colors-solarized](https://github.com/altercation/vim-colors-solarized)
 * [vim-irblack](https://github.com/wgibbs/vim-irblack)
 * [mayansmoke](https://github.com/vim-scripts/mayansmoke)

@@ -321,8 +321,7 @@ let s:git_versions = {}
 function! fugitive#GitVersion(...) abort
   let git = s:GitShellCmd()
   if !has_key(s:git_versions, git)
-    let [out, exec_error] = s:SystemError(s:GitCmd() + ['--version'])
-    let s:git_versions[git] = exec_error ? '' : matchstr(out, '\d[^[:space:]]\+')
+    let s:git_versions[git] = matchstr(s:SystemError(s:GitCmd() + ['--version'])[0], '\d[^[:space:]]\+')
   endif
   if !a:0
     return s:git_versions[git]
@@ -478,7 +477,7 @@ function! s:BuildEnvPrefix(env) abort
   let env = items(a:env)
   if empty(env)
     return ''
-  elseif &shell =~# '\%(powershell\|pwsh\)\%(\.exe\)\=$'
+  elseif &shell =~? '\%(powershell\|pwsh\)\%(\.exe\)\=$'
     return join(map(env, '"$Env:" . v:val[0] . " = ''" . substitute(v:val[1], "''", "''''", "g") . "''; "'), '')
   elseif s:winshell()
     return join(map(env, '"set " . substitute(join(v:val, "="), "[&|<>^]", "^^^&", "g") . "& "'), '')
@@ -538,7 +537,7 @@ function! s:SystemError(cmd, ...) abort
       let guioptions = &guioptions
       set guioptions-=!
     endif
-    let out = call('system', [cmd] + a:000)
+    let out = call('system', [type(a:cmd) == type([]) ? s:shellesc(a:cmd) : a:cmd] + a:000)
     return [out, v:shell_error]
   catch /^Vim\%((\a\+)\)\=:E484:/
     let opts = ['shell', 'shellcmdflag', 'shellredir', 'shellquote', 'shellxquote', 'shellxescape', 'shellslash']
@@ -1670,6 +1669,23 @@ function! fugitive#setfperm(url, perm) abort
   return len(error) ? -1 : 0
 endfunction
 
+function! s:TempCmd(out, cmd) abort
+  try
+    let cmd = (type(a:cmd) == type([]) ? fugitive#Prepare(a:cmd) : a:cmd)
+    let redir = ' > ' . a:out
+    if s:winshell() && !has('nvim')
+      let cmd_escape_char = &shellxquote == '(' ?  '^' : '^^^'
+      return s:SystemError('cmd /c "' . s:gsub(cmd, '[<>%]', cmd_escape_char . '&') . redir . '"')
+    elseif &shell =~? '\%(powershell\|pwsh\)\%(\.exe\)\=$'
+      return s:SystemError(&shell . ' ' . &shellcmdflag . ' ' . s:shellesc(cmd . redir))
+    elseif &shell =~# 'fish'
+      return s:SystemError(' begin;' . cmd . redir . ';end ')
+    else
+      return s:SystemError(' (' . cmd . redir . ') ')
+    endif
+  endtry
+endfunction
+
 if !exists('s:blobdirs')
   let s:blobdirs = {}
 endif
@@ -2394,7 +2410,7 @@ function! fugitive#FileWriteCmd(...) abort
     endif
     silent execute "noautocmd keepalt '[,']write ".temp
     let hash = s:TreeChomp([dir, 'hash-object', '-w', '--', temp])
-    let old_mode = matchstr(s:ChompDefault('', ['ls-files', '--stage', '.' . file], dir), '^\d\+')
+    let old_mode = matchstr(s:ChompError(['ls-files', '--stage', '.' . file], dir)[0], '^\d\+')
     if empty(old_mode)
       let old_mode = executable(s:Tree(dir) . file) ? '100755' : '100644'
     endif
@@ -5906,7 +5922,7 @@ function! s:BlameSubcommand(line1, count, range, bang, mods, options) abort
       let i += 1
       if i == len(flags)
         echohl ErrorMsg
-        echo s:ChompStderr([dir, 'blame', arg])
+        echo s:ChompError([dir, 'blame', arg])[0]
         echohl NONE
         return ''
       endif
