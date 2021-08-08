@@ -16,6 +16,7 @@ source $1/vimrcs/extended.vim
 
 try
   source $1/my_configs.vim
+  source $1/my_themes.vim
 catch
 endtry"
 
